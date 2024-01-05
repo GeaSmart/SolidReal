@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MySolidAPI.Dtos;
+using MySolidAPI.Entities;
 using SolidReal.Factory;
 using SolidReal.Logging;
 using SolidReal.Mapping;
@@ -14,11 +15,11 @@ namespace MySolidAPI.Controllers
     {
         private readonly ApplicationDbContext context;
         private readonly ILogging logging;
-        private readonly RepositoryTarea repositoryTarea;
-        private readonly RepositoryUsuario repositoryUsuario;        
+        private readonly IRepository<Tarea> repositoryTarea;
+        private readonly IRepository<Usuario> repositoryUsuario;        
 
         public TareasController(ApplicationDbContext context, ILoggingFactory logging,
-            RepositoryTarea repositoryTarea, RepositoryUsuario repositoryUsuario)
+            IRepository<Tarea> repositoryTarea, IRepository<Usuario> repositoryUsuario)
         {
             this.context = context;
             this.logging = logging.GetLogger();

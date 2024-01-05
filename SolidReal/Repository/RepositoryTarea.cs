@@ -5,7 +5,7 @@ using SolidReal.Logging;
 
 namespace SolidReal.Repository
 {
-    public class RepositoryTarea
+    public class RepositoryTarea : IRepository<Tarea>
     {
         private readonly ILogging logging;
 
