@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using MySolidAPI.Dtos;
 using MySolidAPI.Entities;
 using Newtonsoft.Json;
+using SolidReal.Logging;
 
 namespace MySolidAPI.Controllers
 {
@@ -11,16 +12,18 @@ namespace MySolidAPI.Controllers
     public class TareasController : ControllerBase
     {
         private readonly ApplicationDbContext context;
+        private readonly LoggingConsola loggingConsola;
 
-        public TareasController(ApplicationDbContext context)
+        public TareasController(ApplicationDbContext context, LoggingConsola loggingConsola)
         {
             this.context = context;
+            this.loggingConsola = loggingConsola;
         }
 
         [HttpGet]
         public async Task<List<TareaConUsuarioDto>> GetAsync()
-        {            
-            Console.WriteLine("Inicio de peticion: GetAsync");
+        {
+            loggingConsola.Log("Inicio de peticion: GetAsync");
             var tareas = await context.Tareas.Include(x => x.Usuario).ToListAsync();
 
             return tareas.Select(x => new TareaConUsuarioDto
@@ -36,7 +39,7 @@ namespace MySolidAPI.Controllers
         {
             try
             {
-                Console.WriteLine("Inicio de petición: ImportFromApi");
+                loggingConsola.Log("Inicio de petición: ImportFromApi");
 
                 var cliente = new HttpClient();
                 var urlTareas = "https://jsonplaceholder.typicode.com/todos";
@@ -67,7 +70,7 @@ namespace MySolidAPI.Controllers
 
                 await context.SaveChangesAsync();
 
-                Console.WriteLine("Fin del procesamiento");
+                loggingConsola.Log("Fin del procesamiento");
                 //throw new NotImplementedException();
 
                 return Ok();
@@ -75,7 +78,7 @@ namespace MySolidAPI.Controllers
 
             catch (Exception ex)
             {
-                Console.WriteLine($"ERROR:{ex.Message}");
+                loggingConsola.LogException(ex);
                 return StatusCode(500);
             }
         }
