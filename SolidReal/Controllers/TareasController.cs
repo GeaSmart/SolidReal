@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MySolidAPI.Dtos;
-using MySolidAPI.Entities;
-using Newtonsoft.Json;
+using SolidReal.Factory;
 using SolidReal.Logging;
 using SolidReal.Mapping;
 using SolidReal.Repository;
@@ -14,15 +13,15 @@ namespace MySolidAPI.Controllers
     public class TareasController : ControllerBase
     {
         private readonly ApplicationDbContext context;
-        private readonly LoggingConsola loggingConsola;
+        private readonly ILogging logging;
         private readonly RepositoryTarea repositoryTarea;
-        private readonly RepositoryUsuario repositoryUsuario;
+        private readonly RepositoryUsuario repositoryUsuario;        
 
-        public TareasController(ApplicationDbContext context, LoggingConsola loggingConsola,
+        public TareasController(ApplicationDbContext context, ILoggingFactory logging,
             RepositoryTarea repositoryTarea, RepositoryUsuario repositoryUsuario)
         {
             this.context = context;
-            this.loggingConsola = loggingConsola;
+            this.logging = logging.GetLogger();
             this.repositoryTarea = repositoryTarea;
             this.repositoryUsuario = repositoryUsuario;
         }
@@ -30,7 +29,7 @@ namespace MySolidAPI.Controllers
         [HttpGet]
         public async Task<List<TareaConUsuarioDto>> GetAsync()
         {
-            loggingConsola.Log("Inicio de peticion: GetAsync");
+            await logging.Log("Inicio de peticion: GetAsync");
             var tareas = await context.Tareas.Include(x => x.Usuario).ToListAsync();
             var tareasConUsuario = tareas.Select(x => x.AsTareaConUsuarioDto(x.Usuario)).ToList();
 
@@ -55,14 +54,14 @@ namespace MySolidAPI.Controllers
                 await context.Tareas.AddRangeAsync(tareasToInsert);
                 await context.SaveChangesAsync();
 
-                loggingConsola.Log("Fin del procesamiento");
-                //throw new NotImplementedException();
+                await logging.Log("Fin del procesamiento");
+                throw new NotImplementedException();
                 return Ok();
             }
 
             catch (Exception ex)
             {
-                loggingConsola.LogException(ex);
+                await logging.LogException(ex);
                 return StatusCode(500);
             }
         }

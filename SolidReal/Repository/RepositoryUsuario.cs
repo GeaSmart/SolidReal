@@ -1,20 +1,21 @@
 ﻿using MySolidAPI.Entities;
 using Newtonsoft.Json;
+using SolidReal.Factory;
 using SolidReal.Logging;
 
 namespace SolidReal.Repository
 {
     public class RepositoryUsuario
     {
-        private readonly LoggingConsola loggingConsola;
+        private readonly ILogging logging;
 
-        public RepositoryUsuario(LoggingConsola loggingConsola)
+        public RepositoryUsuario(ILoggingFactory logging)
         {
-            this.loggingConsola = loggingConsola;
+            this.logging = logging.GetLogger();
         }
         public async Task<List<Usuario>> ObtenerAsync()
         {
-            loggingConsola.Log("Obteniendo usuarios desde API externo");
+            logging.Log("Obteniendo usuarios desde API externo");
 
             var cliente = new HttpClient();
             var urlUsuarios = @"https://jsonplaceholder.typicode.com/users";

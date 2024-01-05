@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MySolidAPI.Entities;
+using SolidReal.Entities;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MySolidAPI
@@ -19,5 +20,6 @@ namespace MySolidAPI
 
         public DbSet<Tarea> Tareas { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
+        public DbSet<Log> Logs { get; set; }
     }
 }

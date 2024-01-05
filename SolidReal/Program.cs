@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using MySolidAPI;
+using SolidReal.Factory;
 using SolidReal.Logging;
 using SolidReal.Repository;
 
@@ -15,7 +16,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 });
 
 //Registrar servicios
-builder.Services.AddTransient<LoggingConsola>();
+builder.Services.AddTransient<ILoggingFactory, LoggingFactory>();
 builder.Services.AddTransient<RepositoryTarea>();
 builder.Services.AddTransient<RepositoryUsuario>();
 

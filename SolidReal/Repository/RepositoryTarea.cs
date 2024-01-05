@@ -1,20 +1,21 @@
 ﻿using MySolidAPI.Entities;
 using Newtonsoft.Json;
+using SolidReal.Factory;
 using SolidReal.Logging;
 
 namespace SolidReal.Repository
 {
     public class RepositoryTarea
     {
-        private readonly LoggingConsola loggingConsola;
+        private readonly ILogging logging;
 
-        public RepositoryTarea(LoggingConsola loggingConsola)
+        public RepositoryTarea(ILoggingFactory logging)
         {
-            this.loggingConsola = loggingConsola;
+            this.logging = logging.GetLogger();
         }
         public async Task<List<Tarea>> ObtenerAsync()
         {
-            loggingConsola.Log("Obteniendo tareas desde API externo");
+            logging.Log("Obteniendo tareas desde API externo");
 
             var cliente = new HttpClient();
             var urlTareas = "https://jsonplaceholder.typicode.com/todos";
