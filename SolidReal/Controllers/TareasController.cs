@@ -4,6 +4,8 @@ using MySolidAPI.Dtos;
 using MySolidAPI.Entities;
 using Newtonsoft.Json;
 using SolidReal.Logging;
+using SolidReal.Mapping;
+using SolidReal.Repository;
 
 namespace MySolidAPI.Controllers
 {
@@ -13,11 +15,16 @@ namespace MySolidAPI.Controllers
     {
         private readonly ApplicationDbContext context;
         private readonly LoggingConsola loggingConsola;
+        private readonly RepositoryTarea repositoryTarea;
+        private readonly RepositoryUsuario repositoryUsuario;
 
-        public TareasController(ApplicationDbContext context, LoggingConsola loggingConsola)
+        public TareasController(ApplicationDbContext context, LoggingConsola loggingConsola,
+            RepositoryTarea repositoryTarea, RepositoryUsuario repositoryUsuario)
         {
             this.context = context;
             this.loggingConsola = loggingConsola;
+            this.repositoryTarea = repositoryTarea;
+            this.repositoryUsuario = repositoryUsuario;
         }
 
         [HttpGet]
@@ -25,13 +32,9 @@ namespace MySolidAPI.Controllers
         {
             loggingConsola.Log("Inicio de peticion: GetAsync");
             var tareas = await context.Tareas.Include(x => x.Usuario).ToListAsync();
+            var tareasConUsuario = tareas.Select(x => x.AsTareaConUsuarioDto(x.Usuario)).ToList();
 
-            return tareas.Select(x => new TareaConUsuarioDto
-            {
-                Id = x.Id,
-                UserName = x.Usuario.Name,
-                Title = x.Title
-            }).ToList();
+            return tareasConUsuario;
         }
 
         [HttpPost]
@@ -39,40 +42,21 @@ namespace MySolidAPI.Controllers
         {
             try
             {
-                loggingConsola.Log("Inicio de petición: ImportFromApi");
-
-                var cliente = new HttpClient();
-                var urlTareas = "https://jsonplaceholder.typicode.com/todos";
-                var responseTareas = await cliente.GetAsync(urlTareas);
-                responseTareas.EnsureSuccessStatusCode();
-
-                var bodyTareas = await responseTareas.Content.ReadAsStringAsync();
-                Console.WriteLine(bodyTareas.Substring(0, 100));
-                var tareas = JsonConvert.DeserializeObject<Tarea[]>(bodyTareas);
-                
-                var urlUsuarios = @"https://jsonplaceholder.typicode.com/users";
-                var responseUsuarios = await cliente.GetAsync(urlUsuarios);
-                responseUsuarios.EnsureSuccessStatusCode();
-
-                var bodyUsuarios = await responseUsuarios.Content.ReadAsStringAsync();
-                Console.WriteLine(bodyUsuarios.Substring(0, 100));
-                var usuarios = JsonConvert.DeserializeObject<Usuario[]>(bodyUsuarios);
+                var tareas = await repositoryTarea.ObtenerAsync();
+                var usuarios = await repositoryUsuario.ObtenerAsync();
 
                 foreach (var item in tareas)
                 {
                     item.Usuario = usuarios.Where(x => x.Id == item.UserId).SingleOrDefault();
                 }
-
-                var tareasFromDb = context.Tareas.Select(x=>x.Id).ToList();
+                var tareasFromDb = context.Tareas.Select(x => x.Id).ToList();
                 var tareasToInsert = tareas.Where(x => !tareasFromDb.Contains(x.Id));
 
                 await context.Tareas.AddRangeAsync(tareasToInsert);
-
                 await context.SaveChangesAsync();
 
                 loggingConsola.Log("Fin del procesamiento");
                 //throw new NotImplementedException();
-
                 return Ok();
             }
 

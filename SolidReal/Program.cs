@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MySolidAPI;
 using SolidReal.Logging;
+using SolidReal.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 //Registrar servicios
 builder.Services.AddTransient<LoggingConsola>();
+builder.Services.AddTransient<RepositoryTarea>();
+builder.Services.AddTransient<RepositoryUsuario>();
+
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
